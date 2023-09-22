@@ -10,22 +10,21 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   final Dio _dio = Dio();
   int page = 1;
 
-  UserBloc() : super(UserInitial());
-@override
-  Stream<UserState> mapEventToState(UserEvent event) async* {
-    if (event is FetchUsers) {
-      try {
+  UserBloc() : super(UserInitial()) {
+     on<FetchUsers>((event, emit) async {
+     try {
         final response = await _dio.get('https://reqres.in/api/users?page=$page');
         if (response.statusCode == 200) {
           page++;
           final users = response.data['data'];
-          yield UserLoadSuccess(users: users);
+          emit(UserLoadSuccess(users: users));
         } else {
-          yield const UserLoadFailure(error: 'Failed to load users');
+          emit(const UserLoadFailure(error: 'Failed to load users'));
         }
       } catch (e) {
-        yield const UserLoadFailure(error: 'Failed to load users');
+         emit(const UserLoadFailure(error: 'Failed to load users'));
       }
-    }
+    });
   }
+  
 }
